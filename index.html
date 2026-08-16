@@ -6,53 +6,66 @@
     <title>AXON Wallet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b0f19; color: #f8fafc; margin: 0; padding: 16px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 420px; }
-        .card { background: #131b2e; border: 1px solid #1e293b; padding: 24px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
-        .logo { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; margin-bottom: 12px; border: 2px solid #38bdf8; }
-        h2 { margin: 0 0 8px 0; font-size: 22px; color: #fff; }
-        p { color: #94a3b8; font-size: 14px; margin-top: 0; }
-        .btn { background: #38bdf8; color: #0b0f19; border: none; padding: 14px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; font-size: 16px; margin-top: 15px; }
-        .btn-secondary { background: #1e293b; color: #38bdf8; border: 1px solid #38bdf8; }
-        .balance-box { background: #0b0f19; border: 1px solid #1e293b; padding: 20px; border-radius: 16px; margin: 20px 0; text-align: left; }
-        .balance-title { font-size: 13px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
-        .balance-amount { font-size: 28px; font-weight: 800; color: #38bdf8; margin-top: 5px; }
-        .wallet-address { font-size: 12px; color: #64748b; background: #1e293b; padding: 6px 12px; border-radius: 20px; display: inline-block; margin-bottom: 15px; }
-        input { width: 100%; padding: 12px; margin-top: 6px; margin-bottom: 15px; border-radius: 10px; background: #0b0f19; border: 1px solid #334155; color: #fff; box-sizing: border-box; font-size: 14px; }
-        label { font-size: 12px; color: #94a3b8; display: block; text-align: left; }
-        .action-row { display: flex; gap: 10px; margin-top: 15px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #07090e; color: #f8fafc; margin: 0; padding: 16px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .container { width: 100%; max-width: 400px; }
+        .card { background: #101726; border: 1px solid #1e293b; padding: 24px; border-radius: 24px; box-shadow: 0 12px 40px rgba(0,0,0,0.6); text-align: center; }
+        
+        /* Logo styling */
+        .logo-container { width: 72px; height: 72px; margin: 0 auto 16px auto; background: linear-gradient(135deg, #38bdf8, #0284c7); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4); }
+        .logo-container img { width: 68px; height: 68px; border-radius: 50%; object-fit: cover; }
+
+        h2 { margin: 0 0 6px 0; font-size: 24px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+        p { color: #94a3b8; font-size: 13px; margin-top: 0; line-height: 1.5; }
+        
+        .btn { background: #38bdf8; color: #07090e; border: none; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; font-size: 15px; margin-top: 12px; transition: opacity 0.2s; }
+        .btn:active { opacity: 0.85; }
+        .btn-secondary { background: #1e293b; color: #38bdf8; border: 1px solid #334155; margin-top: 10px; }
+        
+        .balance-box { background: #07090e; border: 1px solid #1e293b; padding: 20px; border-radius: 18px; margin: 20px 0; text-align: left; }
+        .balance-title { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .balance-amount { font-size: 32px; font-weight: 800; color: #38bdf8; margin-top: 6px; letter-spacing: -1px; }
+        
+        .wallet-badge { font-size: 11px; color: #38bdf8; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); padding: 6px 12px; border-radius: 20px; display: inline-block; margin-bottom: 16px; font-family: monospace; }
+        
+        .input-group { text-align: left; background: #07090e; padding: 16px; border-radius: 18px; border: 1px solid #1e293b; margin-bottom: 12px; }
+        input { width: 100%; padding: 12px; margin-top: 4px; margin-bottom: 12px; border-radius: 10px; background: #101726; border: 1px solid #334155; color: #fff; box-sizing: border-box; font-size: 14px; outline: none; }
+        input:focus { border-color: #38bdf8; }
+        label { font-size: 11px; color: #94a3b8; display: block; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        
         .hidden { display: none !important; }
-        .status { font-size: 13px; padding: 10px; border-radius: 8px; margin-top: 15px; word-break: break-all; }
-        .error { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
-        .success { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid #10b981; }
+        .status { font-size: 13px; padding: 12px; border-radius: 12px; margin-top: 15px; word-break: break-all; text-align: left; }
+        .error { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .success { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="card">
-            <!-- Logo Image -->
-            <img src="https://images.instasize.com/p/407d8ce9deeaf5eda304f1e995e9b95f31f610e325da41cd9c2493ebc43fae61" alt="AXON Logo" class="logo" crossorigin="anonymous">
+            <!-- Professional Logo Display -->
+            <div class="logo-container">
+                <img src="https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?w=150&auto=format&fit=crop&q=80" alt="AXON Logo">
+            </div>
             
             <h2>AXON Wallet</h2>
 
-            <!-- Login View -->
+            <!-- Initial Login State -->
             <div id="loginSection">
-                <p>Secure mobile gateway for AXN tokens. Connect your Web3 wallet to manage assets.</p>
+                <p>Your secure decentralized portal for managing and transferring AXN tokens on-chain.</p>
                 <button class="btn" onclick="connectWallet()">Connect Wallet</button>
             </div>
 
-            <!-- Dashboard View -->
+            <!-- Active Wallet Dashboard -->
             <div id="walletSection" class="hidden">
-                <div class="wallet-address" id="accountText">0x...</div>
+                <div class="wallet-badge" id="accountText">0x...</div>
                 
                 <div class="balance-box">
-                    <div class="balance-title">AXN Balance</div>
-                    <div class="balance-amount" id="axnBalance">0.00</div>
+                    <div class="balance-title">Available Balance</div>
+                    <div class="balance-amount" id="axnBalance">0.00 <span style="font-size: 16px; color: #94a3b8; font-weight: 500;">AXN</span></div>
                 </div>
 
-                <!-- Send Form Box -->
-                <div style="text-align: left; background: #0b0f19; padding: 15px; border-radius: 16px; border: 1px solid #1e293b;">
-                    <h3 style="margin: 0 0 12px 0; font-size: 15px; color: #fff;">Send AXN</h3>
+                <!-- Send Transfer Module -->
+                <div class="input-group">
+                    <div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 10px;">Send AXN</div>
                     <label>Recipient Address</label>
                     <input type="text" id="recipient" placeholder="0x...">
                     
@@ -97,20 +110,20 @@
                     showStatus(err.message, "error");
                 }
             } else {
-                showStatus("Please open this page inside a Web3 wallet app (like MetaMask browser).", "error");
+                showStatus("Please open this page inside your crypto wallet's built-in browser (e.g., MetaMask Mobile).", "error");
             }
         }
 
         async function fetchBalance() {
             try {
-                showStatus("Fetching latest balance...", "success");
+                showStatus("Syncing token balance...", "success");
                 const rawBal = await contract.balanceOf(account);
                 const decimals = await contract.decimals();
                 const formatted = ethers.formatUnits(rawBal, decimals);
-                document.getElementById("axnBalance").innerText = Number(formatted).toLocaleString(undefined, {maximumFractionDigits: 4});
+                document.getElementById("axnBalance").innerHTML = Number(formatted).toLocaleString(undefined, {maximumFractionDigits: 4}) + ' <span style="font-size: 16px; color: #94a3b8; font-weight: 500;">AXN</span>';
                 hideStatus();
             } catch (err) {
-                showStatus("Error loading balance: " + err.message, "error");
+                showStatus("Failed to fetch balance: " + err.message, "error");
             }
         }
 
@@ -124,15 +137,17 @@
             }
 
             try {
-                showStatus("Confirm transaction in your wallet...", "success");
+                showStatus("Approve transaction in your wallet...", "success");
                 const decimals = await contract.decimals();
                 const parsedAmount = ethers.parseUnits(amount, decimals);
                 
                 const tx = await contract.transfer(recipient, parsedAmount);
-                showStatus("Transaction sent! Waiting for confirmation...", "success");
+                showStatus("Transaction broadcasted! Waiting...", "success");
                 
                 await tx.wait();
-                showStatus("Transaction confirmed successfully!", "success");
+                showStatus("Transfer completed successfully!", "success");
+                document.getElementById("recipient").value = "";
+                document.getElementById("amount").value = "";
                 await fetchBalance();
             } catch (err) {
                 showStatus(err.reason || err.message, "error");
