@@ -74,8 +74,16 @@
                     <label>Select Asset</label>
                     <select id="tokenSelect" onchange="switchToken()">
                         <option value="AXN">AXON (AXN)</option>
+                        <option value="USDT">Tether USD (USDT)</option>
                         <option value="USDC">USD Coin (USDC)</option>
-                        <option value="USDT">Tether (USDT)</option>
+                        <option value="BUSD">Binance USD (BUSD)</option>
+                        <option value="DAI">Dai Stablecoin (DAI)</option>
+                        <option value="WBNB">Wrapped BNB (WBNB)</option>
+                        <option value="ETH">Ethereum (ETH)</option>
+                        <option value="BTCB">Bitcoin (BTCB)</option>
+                        <option value="CAKE">PancakeSwap (CAKE)</option>
+                        <option value="LINK">Chainlink (LINK)</option>
+                        <option value="XRP">Ripple (XRP)</option>
                     </select>
                 </div>
 
@@ -104,8 +112,16 @@
     <script>
         const TOKENS = {
             AXN: { address: "0xC7C101be3e01258A4e6111273a412656E36Cd1a3", symbol: "AXN" },
-            USDC: { address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", symbol: "USDC" },
-            USDT: { address: "0xfde4C96c8593536e31f229EA8f37b2ADa2699bb2", symbol: "USDT" }
+            USDT: { address: "0x55d398326f99059ff775485246999027b3197955", symbol: "USDT" },
+            USDC: { address: "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d", symbol: "USDC" },
+            BUSD: { address: "0xe9e7cea3dedca5984780bafc599bd69add087d56", symbol: "BUSD" },
+            DAI: { address: "0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3", symbol: "DAI" },
+            WBNB: { address: "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c", symbol: "WBNB" },
+            ETH: { address: "0x2170ed0880ac9a755fd29b2688956bd959f933f8", symbol: "ETH" },
+            BTCB: { address: "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c", symbol: "BTCB" },
+            CAKE: { address: "0x0e09fabb73bdadeabe0c41393587dbe4b0e25fa1", symbol: "CAKE" },
+            LINK: { address: "0xf8a0bf9cf54bb92f17374d9e9a321e6a111a51bd", symbol: "LINK" },
+            XRP: { address: "0x1d2f0da169ceb9fc7b3144628db156f3f6c60dbe", symbol: "XRP" }
         };
 
         const ABI = [
