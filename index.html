@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AXON Wallet</title>
-    <!-- PWA App Manifest and iOS Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -57,9 +56,10 @@
             <div id="loginSection">
                 <p>Manage and transfer your AXN tokens securely on-chain.</p>
                 <button class="btn" onclick="connectWallet()">Connect Wallet</button>
+                <button class="btn btn-secondary" id="installBtn" onclick="installApp()">📲 Download / Install App</button>
             </div>
 
-            <!-- Active Wallet Dashboard (Shows AXON Balance explicitly) -->
+            <!-- Active Wallet Dashboard -->
             <div id="walletSection" class="hidden">
                 <div class="wallet-badge" id="accountText">0x...</div>
                 
@@ -96,9 +96,29 @@
         ];
         
         let provider, signer, account, contract;
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                // Instructions for iOS / general browsers if automatic prompt isn't fired yet
+                alert("To install AXON Wallet on your device:\n\n• On iPhone/iPad: Tap the Share button in Safari, then select 'Add to Home Screen'.\n• On Android/Desktop: Use your browser menu and select 'Install app' or 'Add to Home screen'.");
+            }
+        }
 
         async function connectWallet() {
-            // Check if injected provider exists (MetaMask / Trust Wallet app browser)
             if (window.ethereum) {
                 try {
                     provider = new ethers.BrowserProvider(window.ethereum);
@@ -109,8 +129,6 @@
                     showStatus(err.message, "error");
                 }
             } else {
-                // If opened in normal Safari/Chrome, try deep-linking to MetaMask mobile app automatically
-                const currentUrl = window.encodeURIComponent(window.location.href);
                 window.location.href = `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`;
             }
         }
