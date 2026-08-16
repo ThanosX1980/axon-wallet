@@ -63,6 +63,12 @@
             <div id="walletSection" class="hidden">
                 <div class="wallet-badge" id="accountText">0x...</div>
                 
+                <!-- Action Buttons: Receive & Refresh -->
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <button class="btn" style="margin-top:0; background: #10b981; color: #fff;" onclick="showReceiveModal()">📥 Receive</button>
+                    <button class="btn btn-secondary" style="margin-top:0;" onclick="fetchBalance()">🔄 Refresh</button>
+                </div>
+
                 <!-- Token Selector Dropdown -->
                 <div style="margin-bottom: 12px; text-align: left;">
                     <label>Select Asset</label>
@@ -89,8 +95,6 @@
                     
                     <button class="btn" style="margin-top:0;" onclick="sendTokens()">Send Tokens</button>
                 </div>
-
-                <button class="btn btn-secondary" onclick="fetchBalance()">Refresh Balance</button>
             </div>
 
             <div id="statusMsg" class="hidden"></div>
@@ -98,20 +102,10 @@
     </div>
 
     <script>
-        // Dictionary of supported assets (replace USDC/USDT addresses with real ones for your target network)
         const TOKENS = {
-            AXN: {
-                address: "0xC7C101be3e01258A4e6111273a412656E36Cd1a3",
-                symbol: "AXN"
-            },
-            USDC: {
-                address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", // Example base/mainnet address, update as needed
-                symbol: "USDC"
-            },
-            USDT: {
-                address: "0xfde4C96c8593536e31f229EA8f37b2ADa2699bb2", // Example base/mainnet address, update as needed
-                symbol: "USDT"
-            }
+            AXN: { address: "0xC7C101be3e01258A4e6111273a412656E36Cd1a3", symbol: "AXN" },
+            USDC: { address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", symbol: "USDC" },
+            USDT: { address: "0xfde4C96c8593536e31f229EA8f37b2ADa2699bb2", symbol: "USDT" }
         };
 
         const ABI = [
@@ -133,13 +127,10 @@
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the install prompt');
-                    }
                     deferredPrompt = null;
                 });
             } else {
-                alert("To install AXON Wallet on your device:\n\n• On iPhone/iPad: Tap the Share button in Safari, then select 'Add to Home Screen'.\n• On Android/Desktop: Use your browser menu and select 'Install app' or 'Add to Home screen'.");
+                alert("To install AXON Wallet:\n\n• iPhone/iPad: Tap Share in Safari -> 'Add to Home Screen'.\n• Android/Desktop: Use browser menu -> 'Install app'.");
             }
         }
 
@@ -161,15 +152,18 @@
         async function setupApp() {
             try {
                 signer = await provider.getSigner();
-
                 document.getElementById("accountText").innerText = account.substring(0, 6) + "..." + account.substring(38);
                 document.getElementById("loginSection").classList.add("hidden");
                 document.getElementById("walletSection").classList.remove("hidden");
-
                 await fetchBalance();
             } catch (err) {
                 showStatus(err.message, "error");
             }
+        }
+
+        function showReceiveModal() {
+            navigator.clipboard.writeText(account);
+            showStatus("Receive Address Copied to Clipboard: " + account, "success");
         }
 
         async function switchToken() {
