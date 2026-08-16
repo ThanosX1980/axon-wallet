@@ -30,7 +30,7 @@
         .wallet-badge { font-size: 11px; color: #38bdf8; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.2); padding: 6px 12px; border-radius: 20px; display: inline-block; margin-bottom: 16px; font-family: monospace; }
         
         .input-group { text-align: left; background: #07090e; padding: 16px; border-radius: 18px; border: 1px solid #1e293b; margin-bottom: 12px; }
-        input { width: 100%; padding: 12px; margin-top: 4px; margin-bottom: 12px; border-radius: 10px; background: #101726; border: 1px solid #334155; color: #fff; box-sizing: border-box; font-size: 14px; outline: none; }
+        input, select { width: 100%; padding: 12px; margin-top: 4px; margin-bottom: 12px; border-radius: 10px; background: #101726; border: 1px solid #334155; color: #fff; box-sizing: border-box; font-size: 14px; outline: none; }
         label { font-size: 11px; color: #94a3b8; display: block; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
         
         .hidden { display: none !important; }
@@ -54,7 +54,7 @@
 
             <!-- Initial Login State -->
             <div id="loginSection">
-                <p>Manage and transfer your AXN tokens securely on-chain.</p>
+                <p>Manage and transfer your tokens securely on-chain.</p>
                 <button class="btn" onclick="connectWallet()">Connect Wallet</button>
                 <button class="btn btn-secondary" id="installBtn" onclick="installApp()">📲 Download / Install App</button>
             </div>
@@ -63,14 +63,24 @@
             <div id="walletSection" class="hidden">
                 <div class="wallet-badge" id="accountText">0x...</div>
                 
+                <!-- Token Selector Dropdown -->
+                <div style="margin-bottom: 12px; text-align: left;">
+                    <label>Select Asset</label>
+                    <select id="tokenSelect" onchange="switchToken()">
+                        <option value="AXN">AXON (AXN)</option>
+                        <option value="USDC">USD Coin (USDC)</option>
+                        <option value="USDT">Tether (USDT)</option>
+                    </select>
+                </div>
+
                 <div class="balance-box">
-                    <div class="balance-title">AXON (AXN) Balance</div>
+                    <div class="balance-title" id="balanceTitle">AXN Balance</div>
                     <div class="balance-amount" id="axnBalance">0.00</div>
                 </div>
 
                 <!-- Send Transfer Module -->
                 <div class="input-group">
-                    <div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 10px;">Send AXN</div>
+                    <div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 10px;" id="sendTitle">Send AXN</div>
                     <label>Recipient Address</label>
                     <input type="text" id="recipient" placeholder="0x...">
                     
@@ -88,14 +98,30 @@
     </div>
 
     <script>
-        const AXN_ADDRESS = "0xC7C101be3e01258A4e6111273a412656E36Cd1a3";
+        // Dictionary of supported assets (replace USDC/USDT addresses with real ones for your target network)
+        const TOKENS = {
+            AXN: {
+                address: "0xC7C101be3e01258A4e6111273a412656E36Cd1a3",
+                symbol: "AXN"
+            },
+            USDC: {
+                address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913", // Example base/mainnet address, update as needed
+                symbol: "USDC"
+            },
+            USDT: {
+                address: "0xfde4C96c8593536e31f229EA8f37b2ADa2699bb2", // Example base/mainnet address, update as needed
+                symbol: "USDT"
+            }
+        };
+
         const ABI = [
             "function balanceOf(address owner) view returns (uint256)",
             "function decimals() view returns (uint8)",
             "function transfer(address to, uint256 amount) returns (bool)"
         ];
         
-        let provider, signer, account, contract;
+        let provider, signer, account;
+        let currentSymbol = "AXN";
         let deferredPrompt;
 
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -113,7 +139,6 @@
                     deferredPrompt = null;
                 });
             } else {
-                // Instructions for iOS / general browsers if automatic prompt isn't fired yet
                 alert("To install AXON Wallet on your device:\n\n• On iPhone/iPad: Tap the Share button in Safari, then select 'Add to Home Screen'.\n• On Android/Desktop: Use your browser menu and select 'Install app' or 'Add to Home screen'.");
             }
         }
@@ -136,7 +161,6 @@
         async function setupApp() {
             try {
                 signer = await provider.getSigner();
-                contract = new ethers.Contract(AXN_ADDRESS, ABI, signer);
 
                 document.getElementById("accountText").innerText = account.substring(0, 6) + "..." + account.substring(38);
                 document.getElementById("loginSection").classList.add("hidden");
@@ -148,13 +172,25 @@
             }
         }
 
+        async function switchToken() {
+            const selector = document.getElementById("tokenSelect");
+            currentSymbol = selector.value;
+            document.getElementById("balanceTitle").innerText = `${currentSymbol} Balance`;
+            document.getElementById("sendTitle").innerText = `Send ${currentSymbol}`;
+            await fetchBalance();
+        }
+
         async function fetchBalance() {
             try {
-                showStatus("Syncing AXN balance...", "success");
-                const rawBal = await contract.balanceOf(account);
-                const decimals = await contract.decimals();
+                showStatus(`Syncing ${currentSymbol} balance...`, "success");
+                const tokenConfig = TOKENS[currentSymbol];
+                const activeContract = new ethers.Contract(tokenConfig.address, ABI, signer);
+
+                const rawBal = await activeContract.balanceOf(account);
+                const decimals = await activeContract.decimals();
                 const formatted = ethers.formatUnits(rawBal, decimals);
-                document.getElementById("axnBalance").innerHTML = Number(formatted).toLocaleString(undefined, {maximumFractionDigits: 4}) + ' <span style="font-size: 16px; color: #94a3b8; font-weight: 500;">AXN</span>';
+                
+                document.getElementById("axnBalance").innerHTML = Number(formatted).toLocaleString(undefined, {maximumFractionDigits: 4}) + ` <span style="font-size: 16px; color: #94a3b8; font-weight: 500;">${currentSymbol}</span>`;
                 hideStatus();
             } catch (err) {
                 showStatus("Failed to fetch balance: " + err.message, "error");
@@ -171,11 +207,14 @@
             }
 
             try {
-                showStatus("Approve transaction in your wallet...", "success");
-                const decimals = await contract.decimals();
+                showStatus(`Approve ${currentSymbol} transfer in your wallet...`, "success");
+                const tokenConfig = TOKENS[currentSymbol];
+                const activeContract = new ethers.Contract(tokenConfig.address, ABI, signer);
+
+                const decimals = await activeContract.decimals();
                 const parsedAmount = ethers.parseUnits(amount, decimals);
                 
-                const tx = await contract.transfer(recipient, parsedAmount);
+                const tx = await activeContract.transfer(recipient, parsedAmount);
                 showStatus("Transaction broadcasted! Waiting...", "success");
                 
                 await tx.wait();
